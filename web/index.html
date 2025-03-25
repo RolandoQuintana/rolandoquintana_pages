@@ -38,19 +38,68 @@
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
+
+  <style>
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 8px solid #3498db;
+      width: 60px;
+      height: 60px;
+      -webkit-animation: spin 1s linear infinite;
+      animation: spin 1s linear infinite;
+    }
+
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    body {
+      background-color: #ffffff;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
+  <div id="loading" class="loading">
+    <div class="loader"></div>
+  </div>
+
   <script>
-    window.addEventListener('load', function(ev) {
+    window.addEventListener('load', function() {
+      var loading = document.querySelector('#loading');
+
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
+        onEntrypointLoaded: async function(engineInitializer) {
+          loading.style.display = "flex"; // Ensure loading is visible
+          const appRunner = await engineInitializer.initializeEngine({
+            // Optimize initial rendering
+            renderer: "html"
           });
+          loading.style.display = "none"; // Hide loading spinner
+          await appRunner.runApp();
         }
       });
     });
