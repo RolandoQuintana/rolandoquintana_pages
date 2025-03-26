@@ -28,7 +28,7 @@ jobs:
         run: flutter pub get
 
       - name: Build
-        run: flutter build web --base-href "/rolandoquintana_pages/" --release --web-renderer html --dart-define=Dart2jsOptimization=O4
+        run: flutter build web --base-href "/" --release --web-renderer html --dart-define=Dart2jsOptimization=O4
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
