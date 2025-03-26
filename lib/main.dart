@@ -4,7 +4,16 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/rendering.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Preload Google Fonts
+  try {
+    await GoogleFonts.pendingFonts();
+  } catch (e) {
+    print('Error loading Google Fonts: $e');
+  }
+
   runApp(const MyApp());
 }
 
@@ -44,6 +53,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _showContent = false;
+  bool _fontsLoaded = false;
   late AnimationController _fadeController;
   late AnimationController _slideController;
   final ScrollController _scrollController = ScrollController();
@@ -106,6 +116,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
+    // Initialize controllers
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -115,6 +127,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 5),
     );
+
+    // Check if fonts are loaded
+    GoogleFonts.pendingFonts().then((_) {
+      if (mounted) {
+        setState(() => _fontsLoaded = true);
+      }
+    }).catchError((error) {
+      print('Error loading fonts: $error');
+    });
 
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
@@ -180,6 +201,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (!_fontsLoaded) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final screenSize = MediaQuery.of(context).size;
 
     return Stack(
