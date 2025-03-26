@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'dart:math';
+import 'dart:ui';
+import 'package:flutter/rendering.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,108 +15,766 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Rolando Quintana',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        primaryColor: Colors.white,
+        colorScheme: const ColorScheme.dark().copyWith(
+          primary: Colors.white,
+          secondary: const Color(0xFF00FFA3),
+          surface: Colors.white,
+        ),
+        textTheme: GoogleFonts.spaceGroteskTextTheme(
+          ThemeData.dark().textTheme,
+        ).apply(
+          bodyColor: Colors.white,
+          displayColor: Colors.white,
+        ),
       ),
       home: const HomePage(),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  bool _showContent = false;
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  final ScrollController _scrollController = ScrollController();
+  final Map<String, GlobalKey> _sectionKeys = {
+    'WELCOME': GlobalKey(),
+    'PROJECTS': GlobalKey(),
+    'EXPERIENCE': GlobalKey(),
+    'ABOUT': GlobalKey(),
+  };
+  final Map<String, bool> _sectionVisible = {
+    'WELCOME': false,
+    'PROJECTS': false,
+    'EXPERIENCE': false,
+    'ABOUT': false,
+  };
+  String _activeSection = 'WELCOME';
+  int _currentSlideIndex = 0;
+
+  final List<HeroSlide> _heroSlides = [
+    HeroSlide(
+      title: 'SOFTWARE\nDEVELOPER.',
+      subtitle: 'Creating innovative solutions through code and design.',
+      imageUrl: 'https://picsum.photos/1200/800?random=0',
+    ),
+    HeroSlide(
+      title: 'PRODUCT\nDESIGNER.',
+      subtitle: 'Crafting intuitive experiences that delight users.',
+      imageUrl: 'https://picsum.photos/1200/800?random=1',
+    ),
+    HeroSlide(
+      title: 'TECH\nINNOVATOR.',
+      subtitle: 'Pushing boundaries in the digital realm.',
+      imageUrl: 'https://picsum.photos/1200/800?random=2',
+    ),
+    HeroSlide(
+      title: 'CREATIVE\nTHINKER.',
+      subtitle: 'Transforming ideas into reality.',
+      imageUrl: 'https://picsum.photos/1200/800?random=3',
+    ),
+  ];
+
+  final List<ProjectData> _projects = [
+    ProjectData(
+      title: 'Flutter Portfolio',
+      description: 'A modern, responsive portfolio website built with Flutter',
+      imageUrl: 'https://picsum.photos/800/500?random=1',
+    ),
+    ProjectData(
+      title: 'Tech Innovation',
+      description: 'Exploring the boundaries of technology',
+      imageUrl: 'https://picsum.photos/800/500?random=2',
+    ),
+    ProjectData(
+      title: 'Digital Experience',
+      description: 'Creating immersive digital experiences',
+      imageUrl: 'https://picsum.photos/800/500?random=3',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    );
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() => _showContent = true);
+        _fadeController.forward();
+      }
+    });
+
+    _scrollController.addListener(() {
+      _checkSectionVisibility();
+      setState(() {}); // Update state for parallax effect
+    });
+    _startSlideshow();
+  }
+
+  void _startSlideshow() {
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _currentSlideIndex = (_currentSlideIndex + 1) % _heroSlides.length;
+          _slideController.reset();
+          _slideController.forward();
+        });
+        _startSlideshow();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _checkSectionVisibility() {
+    for (var entry in _sectionKeys.entries) {
+      final renderObject = entry.value.currentContext?.findRenderObject();
+      if (renderObject is RenderBox) {
+        final position = renderObject.localToGlobal(Offset.zero);
+        if (position.dy < MediaQuery.of(context).size.height * 0.8) {
+          setState(() {
+            _sectionVisible[entry.key] = true;
+            _activeSection = entry.key;
+          });
+        }
+      }
+    }
+  }
+
+  void _scrollToSection(String section) {
+    final key = _sectionKeys[section];
+    if (key?.currentContext != null) {
+      Scrollable.ensureVisible(
+        key!.currentContext!,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+      setState(() => _activeSection = section);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
+    final screenSize = MediaQuery.of(context).size;
+
+    return Stack(
+      children: [
+        // Main content
+        Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(80),
+            child: Container(
+              color: Colors.transparent,
+              child: SafeArea(
+                child: Center(
+                  child: SizedBox(
+                    width: 600,
+                    height: 60,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: Stack(
+                        children: [
+                          BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(40),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 60,
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildNavButton('WELCOME', isActive: true),
+                                _buildNavButton('PROJECTS'),
+                                _buildNavButton('EXPERIENCE'),
+                                _buildNavButton('ABOUT'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 48),
-                  const CircleAvatar(
-                    radius: 64,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 64, color: Colors.blue),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Rolando Quintana',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Software Developer',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 48),
-                ],
-              ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'About Me',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Welcome to my personal website! I am a passionate software developer with expertise in creating modern web applications and mobile apps. I love working with cutting-edge technologies and building solutions that make a difference.',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Skills',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _buildSkillChip('Flutter'),
-                      _buildSkillChip('Dart'),
-                      _buildSkillChip('React'),
-                      _buildSkillChip('TypeScript'),
-                      _buildSkillChip('Node.js'),
-                      _buildSkillChip('Git'),
-                    ],
-                  ),
-                ],
+          ),
+          body: Stack(
+            children: [
+              // Base background
+              Container(
+                color: Colors.black,
               ),
-            ),
-          ],
+              // Subtle gradient overlays
+              Positioned(
+                top: -200,
+                right: -100,
+                child: Container(
+                  width: 600,
+                  height: 600,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFF6B4BA3).withOpacity(0.15),
+                        const Color(0xFF6B4BA3).withOpacity(0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Scrollable content
+              SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  children: [
+                    // Hero Section
+                    Container(
+                      key: _sectionKeys['WELCOME'],
+                      height: screenSize.height,
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Stack(
+                        children: [
+                          // Hero Background Image with Parallax
+                          Positioned(
+                            right: -100,
+                            top: screenSize.height * 0.1,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 1500),
+                              transitionBuilder: (child, animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                              child: Transform.translate(
+                                key: ValueKey(_currentSlideIndex),
+                                offset: Offset(0, _scrollController.hasClients ? _scrollController.offset * 0.3 : 0),
+                                child: Container(
+                                  width: screenSize.width * 0.6,
+                                  height: screenSize.height * 0.6,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(_heroSlides[_currentSlideIndex].imageUrl),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      gradient: LinearGradient(
+                                        begin: Alignment.centerRight,
+                                        end: Alignment.centerLeft,
+                                        colors: [
+                                          Colors.black.withOpacity(0),
+                                          Colors.black.withOpacity(1),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Hero Content with Parallax
+                          Positioned(
+                            left: 0,
+                            top: screenSize.height * 0.2,
+                            child: Transform.translate(
+                              offset: Offset(0, _scrollController.hasClients ? _scrollController.offset * 0.1 : 0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        '• 001',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        'ROLANDO QUINTANA',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          letterSpacing: 3,
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 24),
+                                  SizedBox(
+                                    width: screenSize.width * 0.8,
+                                    child: ScrambleText(
+                                      text: _heroSlides[_currentSlideIndex].title,
+                                      style: TextStyle(
+                                        fontSize: screenSize.width * 0.12,
+                                        height: 0.85,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: -5,
+                                        color: Colors.white,
+                                      ),
+                                      duration: const Duration(milliseconds: 2000),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 32),
+                                  SizedBox(
+                                    width: 500,
+                                    child: ScrambleText(
+                                      text: _heroSlides[_currentSlideIndex].subtitle,
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        height: 1.2,
+                                        color: Colors.white.withOpacity(0.7),
+                                      ),
+                                      duration: const Duration(milliseconds: 3000),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Projects Section
+                    Container(
+                      key: _sectionKeys['PROJECTS'],
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '• 002',
+                            style: TextStyle(
+                              fontSize: 14,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  'A FAMILIAR\nWORLD... SET\nON A DIFFERENT\nPATH.',
+                                  style: TextStyle(
+                                    fontSize: screenSize.width * 0.08,
+                                    height: 0.9,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -3,
+                                    color: Theme.of(context).colorScheme.secondary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 40),
+                              Expanded(
+                                flex: 2,
+                                child: _buildProjectsGrid(),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 120),
+                    // Experience Section
+                    Container(
+                      key: _sectionKeys['EXPERIENCE'],
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  '• 003',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    letterSpacing: 2,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  'PROFESSIONAL\nEXPERIENCE.',
+                                  style: TextStyle(
+                                    fontSize: screenSize.width * 0.06,
+                                    height: 0.9,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -2,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // About Section
+                    Container(
+                      key: _sectionKeys['ABOUT'],
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '• 004',
+                            style: TextStyle(
+                              fontSize: 14,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'ABOUT SECTION CONTENT',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildSkillChip(String label) {
-    return Chip(
-      label: Text(label),
-      backgroundColor: Colors.blue.withOpacity(0.1),
-      labelStyle: const TextStyle(color: Colors.blue),
+  Widget _buildProjectsGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 1,
+        mainAxisSpacing: 20,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: _projects.length,
+      itemBuilder: (context, index) {
+        final project = _projects[index];
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.1),
+            ),
+            image: DecorationImage(
+              image: NetworkImage(project.imageUrl),
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.5),
+                BlendMode.darken,
+              ),
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Project Content
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'PROJECT ${index + 1}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        letterSpacing: 1.5,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      project.title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      project.description,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Hover Gradient
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.8),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNavButton(String text, {bool isActive = false}) {
+    return TextButton(
+      onPressed: () => _scrollToSection(text),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+              color: text == _activeSection ? Colors.white : Colors.white.withOpacity(0.7),
+              fontSize: 14,
+              letterSpacing: 1.5,
+              fontWeight: text == _activeSection ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          const SizedBox(height: 4),
+          if (text == _activeSection)
+            Container(
+              width: 4,
+              height: 4,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProjectData {
+  final String title;
+  final String description;
+  final String imageUrl;
+
+  ProjectData({
+    required this.title,
+    required this.description,
+    required this.imageUrl,
+  });
+}
+
+class HeroSlide {
+  final String title;
+  final String subtitle;
+  final String imageUrl;
+
+  HeroSlide({
+    required this.title,
+    required this.subtitle,
+    required this.imageUrl,
+  });
+}
+
+class ScrambleText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+  final Duration duration;
+
+  const ScrambleText({
+    super.key,
+    required this.text,
+    required this.style,
+    this.duration = const Duration(milliseconds: 1000),
+  });
+
+  @override
+  State<ScrambleText> createState() => _ScrambleTextState();
+}
+
+class _ScrambleTextState extends State<ScrambleText> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  String _displayText = '';
+  String _previousText = '';
+  final Random _random = Random();
+  late TextPainter _textPainter;
+  double _finalTextWidth = 0;
+
+  // Use only monospace characters for scrambling to maintain consistent height
+  final String _scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>{}[]()/\\|_+-=*&^%\$#@!~';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+    );
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    _animation.addListener(_updateText);
+    _previousText = widget.text;
+    _displayText = widget.text;
+
+    // Calculate the width of the final text
+    _textPainter = TextPainter(
+      text: TextSpan(text: widget.text, style: widget.style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    _finalTextWidth = _textPainter.width;
+
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(ScrambleText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text) {
+      _previousText = oldWidget.text;
+      // Recalculate the width of the new final text
+      _textPainter = TextPainter(
+        text: TextSpan(text: widget.text, style: widget.style),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      _finalTextWidth = _textPainter.width;
+      _controller.reset();
+      _controller.forward();
+    }
+  }
+
+  void _updateText() {
+    if (!mounted) return;
+
+    final progress = _animation.value;
+
+    // Split texts into lines
+    final newLines = widget.text.split('\n');
+    final oldLines = _previousText.split('\n');
+
+    // Process each line separately
+    final processedLines = List<String>.generate(
+      max(newLines.length, oldLines.length),
+      (lineIndex) {
+        final newLine = lineIndex < newLines.length ? newLines[lineIndex] : '';
+        final oldLine = lineIndex < oldLines.length ? oldLines[lineIndex] : '';
+
+        final targetLength = newLine.length;
+        final previousLength = oldLine.length;
+        final maxLength = max(targetLength, previousLength);
+
+        // Calculate how many characters to show from each line
+        final currentLength = (maxLength * progress).round();
+
+        if (currentLength == 0) {
+          return oldLine;
+        }
+
+        final newChars = newLine.split('');
+        final oldChars = oldLine.split('');
+
+        // Pad the shorter line with spaces if needed
+        while (newChars.length < maxLength) newChars.add(' ');
+        while (oldChars.length < maxLength) oldChars.add(' ');
+
+        // Only show as many characters as the final text will have
+        final scrambled = List<String>.generate(targetLength, (index) {
+          if (index < currentLength) {
+            // Characters that have been reached are stable
+            return newChars[index];
+          } else if (index < previousLength) {
+            // Characters that haven't been reached yet are scrambling
+            return _scrambleChars[_random.nextInt(_scrambleChars.length)];
+          }
+          // For remaining positions, show scrambled characters
+          return _scrambleChars[_random.nextInt(_scrambleChars.length)];
+        });
+
+        // Ensure the final text is exactly the new text when animation is complete
+        if (progress >= 1.0) {
+          return newLine;
+        }
+
+        return scrambled.join();
+      },
+    );
+
+    setState(() => _displayText = processedLines.join('\n'));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _finalTextWidth,
+      child: Text(
+        _displayText,
+        style: widget.style,
+      ),
     );
   }
 }
