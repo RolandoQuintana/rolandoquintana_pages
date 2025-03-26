@@ -1,11 +1,11 @@
 {
-    "name": "rolandoquintana_pages",
-    "short_name": "rolandoquintana_pages",
+    "name": "Rolando Quintana",
+    "short_name": "Rolando Quintana",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Rolando Quintana's Portfolio",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
