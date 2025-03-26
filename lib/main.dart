@@ -329,7 +329,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       ),
                                       const SizedBox(width: 16),
                                       Text(
-                                        'ROLANDO QUINTANA',
+                                        'ROLANDO D QUINTANA',
                                         style: TextStyle(
                                           fontSize: 14,
                                           letterSpacing: 3,
