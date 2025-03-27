@@ -3,6 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'components/gradient_card.dart';
+import 'components/animated_button.dart';
+import 'components/glassmorphic_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -449,32 +453,91 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Container(
                       key: _sectionKeys['EXPERIENCE'],
                       padding: const EdgeInsets.symmetric(horizontal: 40),
-                      child: Row(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  '• 003',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    letterSpacing: 2,
+                          const Text(
+                            '• 003',
+                            style: TextStyle(
+                              fontSize: 14,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'PROFESSIONAL\nEXPERIENCE.',
+                            style: TextStyle(
+                              fontSize: screenSize.width * 0.06,
+                              height: 0.9,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -2,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          GlassmorphicContainer(
+                            blur: 10.0,
+                            opacity: 0.1,
+                            borderRadius: 16.0,
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                              width: 1,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Senior Software Engineer',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).colorScheme.secondary,
+                                        ),
+                                      ),
+                                      Text(
+                                        '2020 - Present',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                const SizedBox(height: 24),
-                                Text(
-                                  'PROFESSIONAL\nEXPERIENCE.',
-                                  style: TextStyle(
-                                    fontSize: screenSize.width * 0.06,
-                                    height: 0.9,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -2,
-                                    color: Colors.white,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Company Name',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Led the development of multiple high-impact projects, including a complete redesign of the company\'s core platform. Implemented modern architecture patterns and best practices.',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white.withOpacity(0.7),
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      _buildExperienceChip('Flutter'),
+                                      _buildExperienceChip('Dart'),
+                                      _buildExperienceChip('Firebase'),
+                                      _buildExperienceChip('Cloud Functions'),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -496,12 +559,113 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'ABOUT SECTION CONTENT',
+                            'ABOUT ME',
                             style: TextStyle(
-                              fontSize: 32,
+                              fontSize: screenSize.width * 0.06,
+                              height: 0.9,
                               fontWeight: FontWeight.bold,
+                              letterSpacing: -2,
                               color: Colors.white,
                             ),
+                          ),
+                          const SizedBox(height: 40),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: GlassmorphicContainer(
+                                  blur: 10.0,
+                                  opacity: 0.1,
+                                  borderRadius: 16.0,
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Passionate about creating beautiful and functional digital experiences.',
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).colorScheme.secondary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'I am a software developer with a keen eye for design and a passion for creating seamless user experiences. With expertise in Flutter, React, and modern web technologies, I bring ideas to life through clean, efficient code and intuitive interfaces.',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white.withOpacity(0.7),
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 40),
+                              Expanded(
+                                flex: 1,
+                                child: GlassmorphicContainer(
+                                  blur: 10.0,
+                                  opacity: 0.1,
+                                  borderRadius: 16.0,
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Skills',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).colorScheme.secondary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children: [
+                                            _buildExperienceChip('Flutter'),
+                                            _buildExperienceChip('Dart'),
+                                            _buildExperienceChip('React'),
+                                            _buildExperienceChip('TypeScript'),
+                                            _buildExperienceChip('Firebase'),
+                                            _buildExperienceChip('Node.js'),
+                                            _buildExperienceChip('UI/UX Design'),
+                                            _buildExperienceChip('Git'),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 24),
+                                        AnimatedButton(
+                                          text: 'Download CV',
+                                          width: double.infinity,
+                                          height: 45,
+                                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                                          textColor: Colors.black,
+                                          borderRadius: 8,
+                                          onPressed: () {
+                                            // TODO: Implement CV download
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -528,24 +692,37 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       itemCount: _projects.length,
       itemBuilder: (context, index) {
         final project = _projects[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.1),
-            ),
-            image: DecorationImage(
-              image: NetworkImage(project.imageUrl),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.5),
-                BlendMode.darken,
-              ),
-            ),
+        return GlassmorphicContainer(
+          blur: 10.0,
+          opacity: 0.1,
+          borderRadius: 16.0,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+            width: 1,
           ),
           child: Stack(
             children: [
+              // Project Background Image
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.7),
+                      ],
+                    ).createShader(bounds),
+                    blendMode: BlendMode.darken,
+                    child: Image.network(
+                      project.imageUrl,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
               // Project Content
               Padding(
                 padding: const EdgeInsets.all(24),
@@ -578,21 +755,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         color: Colors.white.withOpacity(0.7),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    AnimatedButton(
+                      text: 'View Project',
+                      width: 150,
+                      height: 40,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      textColor: Colors.black,
+                      borderRadius: 8,
+                      onPressed: () {
+                        // TODO: Implement project view action
+                      },
+                    ),
                   ],
-                ),
-              ),
-              // Hover Gradient
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.8),
-                    ],
-                  ),
                 ),
               ),
             ],
@@ -631,6 +806,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildExperienceChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.secondary,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
