@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'components/gradient_card.dart';
 import 'components/animated_button.dart';
 import 'components/glassmorphic_container.dart';
+import 'components/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,79 @@ class MyApp extends StatelessWidget {
           displayColor: Colors.white,
         ),
       ),
-      home: const HomePage(),
+      home: const SplashWrapper(),
+    );
+  }
+}
+
+class SplashWrapper extends StatefulWidget {
+  const SplashWrapper({super.key});
+
+  @override
+  State<SplashWrapper> createState() => _SplashWrapperState();
+}
+
+class _SplashWrapperState extends State<SplashWrapper> with SingleTickerProviderStateMixin {
+  bool _showMainContent = false;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeController,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeController,
+        curve: Curves.fastOutSlowIn,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  void _onSplashComplete() {
+    setState(() {
+      _showMainContent = true;
+    });
+    _fadeController.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_showMainContent) {
+      return SplashScreen(
+        onComplete: _onSplashComplete,
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: _fadeController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: const HomePage(),
+          ),
+        );
+      },
     );
   }
 }
@@ -271,23 +344,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 color: Colors.black,
               ),
               // Subtle gradient overlays
-              Positioned(
-                top: -200,
-                right: -100,
-                child: Container(
-                  width: 600,
-                  height: 600,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFF6B4BA3).withOpacity(0.15),
-                        const Color(0xFF6B4BA3).withOpacity(0),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              // Positioned(
+              //   top: -200,
+              //   right: -100,
+              //   child: Container(
+              //     width: 600,
+              //     height: 600,
+              //     decoration: BoxDecoration(
+              //       shape: BoxShape.circle,
+              //       gradient: RadialGradient(
+              //         colors: [
+              //           const Color(0xFF6B4BA3).withOpacity(0.15),
+              //           const Color(0xFF6B4BA3).withOpacity(0),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // ),
               // Scrollable content
               SingleChildScrollView(
                 controller: _scrollController,
